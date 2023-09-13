@@ -1,0 +1,20 @@
+﻿file,comp_1_2,comp_3,comp_4,comp_5,type
+0,,,,,ref
+1,Au + AMP,azide,citr,w,au
+2,Au + azide,AMP,citr,w,au
+3,Au + citr,AMP,azide,w,au
+4,Au + AMP,citr,azide,w,au
+5,Au + citr,azide,AMP,w,au
+6,Au + azide,citr,AMP,w,au
+7,AMP + azide,citr,Au,w,au
+8,AMP + azide,citr,Au,w,au
+9,AMP + citr,azide,Au,w,au
+10,AMP + citr,azide,Au,w,au
+11,azide + citr,AMP,Au,w,au
+12,azide + citr,AMP,Au,w,au
+13,AMP + azide,citr,w,Au,au
+14,AMP + azide,citr,w,Au,au
+15,AMP + citr,azide,w,Au,au
+16,AMP + citr,azide,w,Au,au
+17,azide + citr,AMP,w,Au,au
+18,azide + citr,AMP,w,Au,au
