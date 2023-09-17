@@ -1,13 +1,16 @@
-library(tictoc)
-
-tic("Whole script")
-
 source("00_setup.R")
 source("01_functions.R")
 # for subscript in ggplot
 library(ggtext)
 # ANOVA
 library(car)
+
+
+if (!dir.exists(here("plots"))) dir.create(here("plots"))
+
+if (!dir.exists(here("plots", "mendcomm"))) dir.create(here("plots", "mendcomm"))
+if (!dir.exists(here("plots", "analytica"))) dir.create(here("plots", "analytica"))
+
 
 
 #### N3 series ####
@@ -240,48 +243,6 @@ order_fluoro <- here('data', 'order', '2023-07-14', 'fluoro') %>%
             ligands_first = all(ligands_first))
 
 
-# all orders
-ggplot(data = order_fluoro %>% filter(!is.na(water_last)), 
-       aes(x = wavelength, y = intensity)) +
-  geom_line(aes(color = label, group = label)) +
-  lims(x = c(400, 900), y = c(0, 4500)) +
-  labs(x = "Wavelength, nm", y = "Intensity", color = "order")
-
-# three groups
-ggplot(data = order_fluoro %>% filter(!is.na(water_last)), 
-       aes(x = wavelength, y = intensity)) +
-  geom_line(aes(color = glue("LF-{ligands_first}_AuL-{au_last}"), group = label)) +
-  lims(x = c(400, 900), y = c(0, 4500)) +
-  labs(x = "Wavelength, nm", y = "Intensity", color = "order") +
-  theme(legend.position = "top")
-
-
-
-ggplot(data = order_fluoro %>% filter(ligands_first), 
-       aes(x = wavelength, y = intensity)) +
-  geom_line(aes(group = label), color = "black") +
-  geom_line(data = order_fluoro %>% filter(!ligands_first),
-            aes(color = label, group = label)) +
-  lims(x = c(400, 900), y = c(0, 4500)) +
-  labs(x = "Wavelength, nm", y = "Intensity", color = "order") +
-  theme(legend.position = "top")
-
-
-
-ggplot(data = order_fluoro %>% filter(au_last), 
-       aes(x = wavelength, y = intensity)) +
-  geom_line(aes(group = label), color = "black") +
-  geom_line(data = order_fluoro %>% filter(water_last),
-            aes(group = label), color = "grey") +
-  geom_line(data = order_fluoro %>% filter(!ligands_first),
-            aes(color = label, group = label)) +
-  lims(x = c(400, 900), y = c(0, 4500)) +
-  labs(x = "Wavelength, nm", y = "Intensity", color = "order") +
-  theme(legend.position = "top")
-
-
-
-
 
 order_abs <- here('data', 'order', '2023-07-14', 'abs') %>%
   list.files(pattern = ".*txt", full.names = TRUE) %>%
@@ -303,34 +264,17 @@ order_abs <- here('data', 'order', '2023-07-14', 'abs') %>%
 
 
 
-
-
-
-ggplot(data = order_abs %>% filter(!is.na(water_last)), 
-       aes(x = wavelength, y = absorbance)) +
-  geom_line(aes(color = label, group = label)) +
-  lims(x = c(250, 500), y = c(0, 2)) +
-  labs(x = "Wavelength, nm", y = "Absorbance", color = "order")
-
-
-ggplot(data = order_abs %>% filter(!is.na(water_last)), 
-       aes(x = wavelength, y = absorbance)) +
-  geom_line(aes(color = glue("LF-{ligands_first}_AuL-{au_last}"), group = label)) +
-  lims(x = c(250, 500), y = c(0, 2)) +
-  labs(x = "Wavelength, nm", y = "Absorbance", color = "order") +
-  theme(legend.position = "top")
-
 # different orders versus all ligands < gold < water
-ggplot(data = order_abs %>% filter(ligands_first), 
+(ggplot(data = order_abs %>% filter(ligands_first), 
        aes(x = wavelength, y = absorbance)) +
-  geom_line(aes(group = label), color = "grey", size = 1) +  
+  geom_line(aes(group = label), color = "grey", linewidth = 1) +  
   geom_line(data = order_abs %>% filter(ligands_first & water_last),
-            aes(group = label), color = "black", size = 1) +
+            aes(group = label), color = "black", linewidth = 1) +
   geom_line(data = order_abs %>% filter(!ligands_first),
-            aes(color = label, group = label), size = 1) +
+            aes(color = label, group = label), linewidth = 1) +
   lims(x = c(282, 500), y = c(0, 1.5)) +
   labs(x = "Wavelength, nm", y = "Absorbance", color = "Mixing order") +
-  theme(legend.position = c(0.65, 0.75))
+  theme(legend.position = c(0.65, 0.75)))
 
 ggsave(filename = here("plots", "analytica", "fig_1a.tiff"), 
        dpi = 300)
@@ -346,16 +290,16 @@ order_fluoro_reduced <- order_fluoro %>%
 
 
 
-ggplot(data = order_fluoro_reduced %>% filter(au_last), 
+(ggplot(data = order_fluoro_reduced %>% filter(au_last), 
        aes(x = wavelength, y = intensity / absorbance)) +
-  geom_line(aes(group = label), color = "black", size = 1) +
+  geom_line(aes(group = label), color = "black", linewidth = 1) +
   geom_line(data = order_fluoro_reduced %>% filter(water_last),
-            aes(group = label), color = "grey", size = 1) +
+            aes(group = label), color = "grey", linewidth = 1) +
   geom_line(data = order_fluoro_reduced %>% filter(!ligands_first),
-            aes(color = label, group = label), size = 1) +
+            aes(color = label, group = label), linewidth = 1) +
   lims(x = c(400, 900), y = c(0, 36000)) +
   labs(x = "Wavelength, nm", y = "Normalized intensity", color = "Mixing order") +
-    theme(legend.position = c(0.65, 0.75))
+    theme(legend.position = c(0.65, 0.75)))
 
 ggsave(filename = here("plots", "analytica", "fig_1b.tiff"), 
        dpi = 300)
@@ -364,14 +308,7 @@ ggsave(filename = here("plots", "analytica", "fig_1b.tiff"),
 
 
 
-
-
-
-
-
 #### factorial AuNC ####
-
-
 # import absorbance spectra for quantum yield measurement
 factorial_abs <- here('data', 'factorial', '2023-08-02', 'abs') %>%
   list.files(pattern = "^Absorbance.*txt", full.names = TRUE) %>%
@@ -404,7 +341,6 @@ factorial_abs_diluted <- here('data', 'factorial', '2023-08-02', 'diluted_abs') 
   
 
 # import quantum yield fluorescence spectra
-
 factorial_fluoro_diluted <- here('data', 'factorial', '2023-08-02', 'diluted_fluoro') %>%
   list.files(pattern = "^Subt2_.*txt", full.names = TRUE) %>%
   lapply(FUN = read_ocean_fluoro)  %>%
@@ -420,11 +356,6 @@ factorial_fluoro_diluted <- here('data', 'factorial', '2023-08-02', 'diluted_flu
 
 
 
-
-#ggplot(data = factorial_fluoro_diluted, aes(x = wavelength, y = intensity)) +
-#  geom_line(aes(color = factor(file)))
-
-
 factorial_abs365 <- factorial_abs_diluted %>%
   filter(abs(wavelength - 365) <= 3) %>%
   group_by(file) %>%
@@ -435,7 +366,7 @@ factorial_qy <- factorial_fluoro_diluted %>%
 
 
 # plot for overview of fluorescence spectra
-ggplot(data = factorial_qy %>%
+(ggplot(data = factorial_qy %>%
         filter(type == "au") %>%
         filter(wavelength >= 400) %>%
         mutate(intensity = intensity / absorbance)) +
@@ -449,13 +380,13 @@ ggplot(data = factorial_qy %>%
   labs(x = "Wavelength, nm", y = "Normalzed intensity, a.u.") +
   scale_color_discrete(type = c("blue", "red")) +
   theme(axis.text.y = element_blank()) +
-  theme(legend.position = "none")
+  theme(legend.position = "none"))
 
 ggsave(filename = here("plots", "analytica", "fig_2.tiff"), 
        dpi = 300)
 
 
-ggplot(data = factorial_qy %>%
+(ggplot(data = factorial_qy %>%
          filter(type == "au") %>%
          filter(N3_level == -1) %>%
          filter(wavelength >= 400) %>%
@@ -468,74 +399,12 @@ ggplot(data = factorial_qy %>%
   theme(axis.text.y = element_blank()) +
   theme(legend.position = "top") +
   theme(strip.text = element_markdown(),
-        legend.title = element_markdown())
+        legend.title = element_markdown()))
 
 ggsave(filename = here("plots", "analytica", "fig_3b.tiff"), 
        dpi = 300)
 
 
-
-
-
-
-ggplot(data = factorial_qy %>%
-         filter(type == "au") %>%
-         mutate(intensity = intensity / absorbance,
-                azide = glue("N3 = {N3_level}"),
-                AMP = glue("AMP = {AMP_level}"))) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = factor(Au_level))) +
-  facet_grid(azide ~ AMP, scales = "fixed") +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "Au") +
-  theme(legend.position = "top")
-
-ggplot(data = factorial_qy %>%
-         filter(type == "au") %>%
-         mutate(intensity = intensity / absorbance,
-                azide = glue("N3 = {N3_level}"),
-                AMP = glue("AMP = {AMP_level}"))) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = factor(Citr_level))) +
-  facet_grid(azide ~ AMP, scales = "fixed") +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "Citr") +
-  theme(legend.position = "top")
-
-
-ggplot(data = factorial_qy %>%
-         filter(type == "au") %>%
-         mutate(intensity = intensity / absorbance,
-                azide = glue("N3 = {N3_level}"),
-                AMP = glue("AMP = {AMP_level}"))) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = factor(NaH_level))) +
-  facet_grid(azide ~ AMP, scales = "fixed") +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "Na/H") +
-  theme(legend.position = "top")
-
-
-
-ggplot(data = factorial_qy %>%
-         filter(NaH_level == 0) %>%
-         mutate(intensity = intensity / absorbance,
-                azide = glue("N3 = {N3_level}"),
-                AMP = glue("AMP = {AMP_level}"))) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = glue("Au = {Au_level} / Citr = {Citr_level}"))) +
-  facet_grid(azide ~ AMP, scales = "fixed") +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "") +
-  theme(legend.position = "top")
-
-
-ggplot(data = factorial_qy %>%
-         filter(N3_level == -1) %>%
-         mutate(intensity = intensity / absorbance,
-                NaH = glue("NaH = {NaH_level}"),
-                Citr = glue("Citr = {Citr_level}"))) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = glue("AMP = {AMP_level}"))) +
-  facet_grid(NaH ~ Citr, scales = "fixed") +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "") +
-  theme(legend.position = "top")
-
-
-
-
-#ggsave(here("plots", "fluoro_qualitative_overview.tiff"))
 
 
 factorial_fluoro_integral <- factorial_qy %>%
@@ -574,14 +443,6 @@ factorial_scatter_integral <- factorial_scatter_integral %>%
   left_join(factorial_ref_scatter, keep = FALSE, by = "type") %>%
   mutate(rel_scatter = integral / ref_integral) %>%
   filter(!str_detect(type, "ref"))
-
-
-ggplot(data = factorial_qy %>%
-         filter(N3_level == 0 & AMP_level == 0) %>%
-         mutate(intensity = intensity / absorbance)) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = factor(file))) +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "") +
-  theme(legend.position = "top")
 
 
 
@@ -640,6 +501,7 @@ Anova(lm_factorial_qy_noN3, type = "II")
 summary(lm_factorial_qy_noN3)
 
 
+
 lm_factorial_target <- lm(data = factorial_anova %>%
                             filter(qy > 0.01), 
                           formula = int_600_490 ~ (Au_level + AMP_level + N3_level + Citr_level + NaH_level)^2)
@@ -647,32 +509,11 @@ Anova(lm_factorial_target, type = "II")
 summary(lm_factorial_target)
 
 
-
-
 lm_factorial_target_reduced <- lm(data = factorial_anova %>%
                         filter(qy > 0.01), 
                   formula = int_600_490 ~ Au_level + (AMP_level + N3_level + Citr_level + NaH_level)^2 - AMP_level:Citr_level - AMP_level:NaH_level - Citr_level:NaH_level)
 Anova(lm_factorial_target_reduced, type = "II")
 summary(lm_factorial_target_reduced)
-
-
-#model_au_yellow_red <- lm(data = au_anova, 
-#                      formula = int_600_490 ~ N3_level + AMP_level + NaH_level + AMP_level:NaH_level + N3_level:NaH_level)
-#Anova(model_au_yellow_red, type = "II")
-#summary(model_au_yellow_red)
-
-ggplot(data = factorial_anova, aes(x = int_365, y = qy)) +
-  geom_point(aes(color = factor(NaH_level), shape = factor(N3_level)), size = 3)
-
-
-ggplot(data = factorial_anova, aes(x = int_600_490, y = qy)) +
-  geom_point(aes(color = factor(NaH_level), shape = factor(N3_level)), size = 3)
-
-
-ggplot(data = factorial_anova %>%
-         filter(N3_level == 1, NaH_level == 1), aes(x = int_600_490, y = qy)) +
-  geom_point(aes(color = factor(AMP_level), shape = factor(Citr_level)), size = 3)
-
 
 
 
@@ -706,23 +547,15 @@ factorial_predicted <- expand.grid(Au = seq(-1, 1, 0.05),
                                         Citr = Citr,
                                         NaH = NaH)) %>%
   mutate(qy = response_factorial_qy(N3 = N3, NaH = NaH)) %>%
-  mutate(target = ifelse(qy > 0.02, qy * yellow, 0))
+  mutate(target = ifelse(qy > 2, qy * yellow, 0))
   
 
-ggplot(data = factorial_predicted %>%
-         filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)), aes(x = AMP, y = N3, z = yellow)) +
-  geom_contour_filled() +
-  facet_grid(Citr ~ NaH, labeller = label_both) +
-  theme(strip.text.x = element_text(size = 14, face = "plain"))
 
-
-
-
-ggplot(data = factorial_predicted %>%
+(ggplot(data = factorial_predicted %>%
          filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)) %>%
          mutate(NaH = glue("<i>r</i><sub>Na/H</sub> = {NaH}"),
                 Citr = glue("<i>r</i><sub>citr</sub> = {Citr}")),
-       aes(x = AMP, y = N3, z = qy * 100)) +
+       aes(x = AMP, y = N3, z = qy)) +
   geom_contour_filled() +
   facet_grid(Citr ~ NaH) +
   labs(x = "<i>r</i><sub>AMP</sub>", y = "<i>r</i><sub>azide</sub>", fill = "QY, %") +
@@ -731,32 +564,13 @@ ggplot(data = factorial_predicted %>%
   theme(strip.text.x  = element_markdown(size = 14, face = "bold"),
         strip.text.y  = element_markdown(size = 14, face = "bold"),
         axis.title.x = element_markdown(),
-        axis.title.y = element_markdown())
+        axis.title.y = element_markdown()))
 
 ggsave(filename = here("plots", "analytica", "fig_3a.tiff"), 
        dpi = 300)
 
 
-
-ggplot(data = factorial_predicted %>%
-         filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)), aes(x = AMP, y = N3, z = qy)) +
-  geom_contour_filled() +
-  facet_grid(Citr ~ NaH, labeller = label_both) +
-  theme(strip.text.x = element_text(size = 14, face = "plain"))
-
-
-
-
-
-
-ggplot(data = factorial_predicted %>%
-         filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)), aes(x = AMP, y = N3, z = target * 100)) +
-  geom_contour_filled() +
-  facet_grid(Citr ~ NaH, labeller = label_both) +
-  theme(strip.text.x = element_text(size = 14, face = "plain"))
-
-
-ggplot(data = factorial_predicted %>%
+(ggplot(data = factorial_predicted %>%
          filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)) %>%
          mutate(NaH = glue("<i>r</i><sub>Na/H</sub> = {NaH}"),
                 Citr = glue("<i>r</i><sub>citr</sub> = {Citr}")),
@@ -771,7 +585,7 @@ ggplot(data = factorial_predicted %>%
         strip.text.y  = element_markdown(size = 14, face = "bold"),
         axis.title.x = element_markdown(),
         axis.title.y = element_markdown(),
-        legend.title = element_markdown())
+        legend.title = element_markdown()))
 
 ggsave(filename = here("plots", "analytica", "fig_5a.tiff"), 
        dpi = 300)
@@ -779,11 +593,11 @@ ggsave(filename = here("plots", "analytica", "fig_5a.tiff"),
 
 
 
-ggplot(data = factorial_predicted %>%
+(ggplot(data = factorial_predicted %>%
          filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)) %>%
          mutate(NaH = glue("<i>r</i><sub>Na/H</sub> = {NaH}"),
                 Citr = glue("<i>r</i><sub>citr</sub> = {Citr}")),
-       aes(x = AMP, y = N3, z = target * 100)) +
+       aes(x = AMP, y = N3, z = target)) +
   geom_contour_filled() +
   facet_grid(Citr ~ NaH) +
   labs(x = "<i>r</i><sub>AMP</sub>", y = "<i>r</i><sub>azide</sub>", fill = "T, %") +
@@ -792,7 +606,7 @@ ggplot(data = factorial_predicted %>%
   theme(strip.text.x  = element_markdown(size = 14, face = "bold"),
         strip.text.y  = element_markdown(size = 14, face = "bold"),
         axis.title.x = element_markdown(),
-        axis.title.y = element_markdown())
+        axis.title.y = element_markdown()))
 
 ggsave(filename = here("plots", "analytica", "fig_5b.tiff"), 
        dpi = 300)
@@ -818,8 +632,6 @@ factorial_predicted %>%
 
 
 #### factorial AuNC - additional samples - max yellow ####
-
-
 # import absorbance spectra for quantum yield measurement
 yellow_abs_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_abs') %>%
   list.files(pattern = "^Absorbance.*txt", full.names = TRUE) %>%
@@ -837,13 +649,7 @@ yellow_abs_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_abs') %>%
   mutate(label = glue("au{Au_conc}_AMP{AMP_ratio}_Citr{Citr_ratio}_NaH{NaH_ratio}_N3{N3_ratio}"))
 
 
-ggplot(data = yellow_abs_diluted %>% filter(type != 'ref'), aes(x = wavelength, y = absorbance)) +
-  geom_line(aes(color = factor(file)))
-
-
-
 # import quantum yield fluorescence spectra
-
 yellow_fluoro_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_fluoro') %>%
   list.files(pattern = "^Subt2_.*txt", full.names = TRUE) %>%
   lapply(FUN = read_ocean_fluoro)  %>%
@@ -857,8 +663,6 @@ yellow_fluoro_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_fluoro
   filter(wavelength <= 900) %>%
   mutate(label = glue("au{Au_conc}_AMP{AMP_ratio}_Citr{Citr_ratio}_NaH{NaH_ratio}_N3{N3_ratio}"))
 
-ggplot(data = yellow_fluoro_diluted %>% filter(type != 'ref'), aes(x = wavelength, y = intensity)) +
-  geom_line(aes(color = factor(file)))
 
 
 yellow_abs365 <- yellow_abs_diluted %>%
@@ -868,15 +672,6 @@ yellow_abs365 <- yellow_abs_diluted %>%
 
 yellow_qy <- yellow_fluoro_diluted %>%
   left_join(yellow_abs365, by = "file")
-
-
-# plot for overview of fluorescence spectra
-ggplot(data = yellow_qy %>%
-         filter(type != "ref") %>%
-         mutate(intensity = intensity / absorbance)) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = factor(file))) +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "") +
-  theme(legend.position = "none")
 
 
 
@@ -957,15 +752,15 @@ Anova(lm_yellow_target_reduced, type = "II")
 summary(lm_yellow_target_reduced)
 
 
+
 lm_yellow_qy <- lm(data = yellow_anova, 
                        formula = qy ~ (AMP_level + N3_level + Citr_level + NaH_level)^2)
 Anova(lm_yellow_qy, type = "II")
 summary(lm_yellow_qy)
 
 
-
 lm_yellow_qy_reduced <- lm(data = yellow_anova, 
-                               formula = qy ~ AMP_level + NaH_level + AMP_level:NaH_level + Citr_level)
+                               formula = qy ~ AMP_level + NaH_level)
 Anova(lm_yellow_qy_reduced, type = "II")
 summary(lm_yellow_qy_reduced)
 
@@ -999,13 +794,11 @@ yellow_predicted <- expand.grid(AMP = seq(-1, 1, 0.05),
                                          Citr = Citr,
                                          NaH = NaH))
 
-Citr_labs <- c("Citr: -1", "Citr: 0", "Citr: 1")
-names(Citr_labs) <- c("-1", "0", "1")
 
-ggplot(data = yellow_predicted %>%
+(ggplot(data = yellow_predicted %>%
          filter(Citr %in% c(-1, 0, 1)) %>%
          mutate(Citr = glue("<i>r</i><sub>citr</sub> = {Citr}")), 
-       aes(x = AMP, y = NaH, z = target * 100)) +
+       aes(x = AMP, y = NaH, z = target)) +
   geom_contour_filled() +
   facet_wrap(~ Citr, nrow = 1) +
   scale_x_continuous(breaks = seq(-1, 1, len = 3)) +
@@ -1014,54 +807,25 @@ ggplot(data = yellow_predicted %>%
   theme(strip.text.x  = element_markdown(size = 14, face = "bold"),
         axis.title.x = element_markdown(),
         axis.title.y = element_markdown(),
-        legend.position = "top")
+        legend.position = "top"))
 
 ggsave(filename = here("plots", "analytica", "fig_6.tiff"), 
        dpi = 300)
 
 
 
-ggplot(data = factorial_predicted %>%
-         filter(Citr %in% c(-1, 0, 1) & NaH %in% c(-1, 0, 1)) %>%
-         mutate(NaH = glue("<i>r</i><sub>Na/H</sub> = {NaH}"),
-                Citr = glue("<i>r</i><sub>citr</sub> = {Citr}")),
-       aes(x = AMP, y = N3, z = qy * 100)) +
-  geom_contour_filled() +
-  facet_grid(Citr ~ NaH) +
-  labs(x = "<i>r</i><sub>AMP</sub>", y = "<i>r</i><sub>azide</sub>", fill = "QY, %") +
-  scale_x_continuous(breaks = c(-1, 0, 1)) +
-  scale_y_continuous(breaks = c(-1, 0, 1)) +
-  theme(strip.text.x  = element_markdown(size = 14, face = "bold"),
-        strip.text.y  = element_markdown(size = 14, face = "bold"),
-        axis.title.x = element_markdown(),
-        axis.title.y = element_markdown())
 
 
 
-
-
-
-ggplot(data = yellow_predicted %>%
-         filter(Citr %in% c(-1, 0, 1)), aes(x = AMP, y = NaH, z = qy * 100)) +
-  geom_contour_filled() +
-  facet_wrap(~ Citr, nrow = 1, labeller = labeller(Citr = Citr_labs)) +
-  scale_x_continuous(breaks = seq(-1, 1, len = 3)) +
-  scale_y_continuous(breaks = seq(-1, 1, len = 3)) +
-  theme(strip.text.x = element_text(size = 14, face = "plain"),
-        legend.position = "top")
-
-
-
-
-yellow_predicted %>%
-  filter(Citr >= 0.95) %>%
-  filter(NaH <= - 0.95) %>%
-  filter(AMP <= -0.95)
-
-yellow_anova %>%
-  filter(Citr_level >= 0.95) %>%
-  filter(NaH_level <= - 0.95) %>%
-  filter(AMP_level <= -0.95)
+# yellow_predicted %>%
+#   filter(Citr >= 0.95) %>%
+#   filter(NaH <= - 0.95) %>%
+#   filter(AMP <= -0.95)
+# 
+# yellow_anova %>%
+#   filter(Citr_level >= 0.95) %>%
+#   filter(NaH_level <= - 0.95) %>%
+#   filter(AMP_level <= -0.95)
 
 
 #### factorial AuNC - additional samples - max qy ####
@@ -1083,13 +847,8 @@ blue_abs_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_abs') %>%
   mutate(label = glue("au{Au_conc}_AMP{AMP_ratio}_Citr{Citr_ratio}_NaH{NaH_ratio}_N3{N3_ratio}"))
 
 
-ggplot(data = blue_abs_diluted %>% filter(type != 'ref'), aes(x = wavelength, y = absorbance)) +
-  geom_line(aes(color = factor(file)))
-
-
 
 # import quantum yield fluorescence spectra
-
 blue_fluoro_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_fluoro') %>%
   list.files(pattern = "^Subt2_.*txt", full.names = TRUE) %>%
   lapply(FUN = read_ocean_fluoro)  %>%
@@ -1103,8 +862,6 @@ blue_fluoro_diluted <- here('data', 'factorial', '2023-08-10', 'diluted_fluoro')
   filter(wavelength <= 900) %>%
   mutate(label = glue("au{Au_conc}_AMP{AMP_ratio}_Citr{Citr_ratio}_NaH{NaH_ratio}_N3{N3_ratio}"))
 
-ggplot(data = blue_fluoro_diluted %>% filter(type != 'ref'), aes(x = wavelength, y = intensity)) +
-  geom_line(aes(color = factor(file)))
 
 
 blue_abs365 <- blue_abs_diluted %>%
@@ -1114,15 +871,6 @@ blue_abs365 <- blue_abs_diluted %>%
 
 blue_qy <- blue_fluoro_diluted %>%
   left_join(blue_abs365, by = "file")
-
-
-# plot for overview of fluorescence spectra
-ggplot(data = blue_qy %>%
-         filter(type != "ref") %>%
-         mutate(intensity = intensity / absorbance)) +
-  geom_line(aes(x = wavelength, y = intensity, group = file, color = factor(file))) +
-  labs(x = "Длина волны, нм", y = "Интенсивность", color = "") +
-  theme(legend.position = "none")
 
 
 
@@ -1149,7 +897,7 @@ blue_fluoro_integral <- blue_fluoro_integral %>%
 
 
 
-ggplot(data = blue_fluoro_integral) +
+(ggplot(data = blue_fluoro_integral) +
   geom_col(aes(x = factor(NaH_ratio), y = qy * 100, 
                fill = glue("{AMP_ratio} / {Citr_ratio}")),
            position = position_dodge()) +
@@ -1160,19 +908,17 @@ ggplot(data = blue_fluoro_integral) +
   theme(axis.text.x = element_markdown(angle = 45, vjust = 0.7, hjust = 0.5),
         axis.title.x = element_markdown(),
         legend.title = element_markdown(),
-        legend.position = "right")
+        legend.position = "right"))
 
 ggsave(filename = here("plots", "analytica", "fig_4.tiff"), 
        dpi = 300)
 
 
 #### experiments with samples optimized for qy and target ####
-
 samples_AB_pH <- read_csv(here('data', 'pH', 'samples.csv'))
 
 
 # import quantum yield fluorescence spectra
-
 AB_pH_fluoro <- here('data', 'pH', '2023-08-24', 'fluoro') %>%
   list.files(pattern = ".*txt", full.names = TRUE) %>%
   lapply(FUN = read_ocean_fluoro)  %>%
@@ -1204,7 +950,7 @@ ggsave(filename = here("plots", "analytica", "fig_7a.tiff"),
 
 
 
-ggplot(data = AB_pH_fluoro %>% filter(is.na(pH)) %>%
+(ggplot(data = AB_pH_fluoro %>% filter(is.na(pH)) %>%
          group_by(file, conc_rel) %>%
          summarize(sample = sample(sample, 1),
                    integral = sum(intensity)),
@@ -1216,7 +962,7 @@ ggplot(data = AB_pH_fluoro %>% filter(is.na(pH)) %>%
        color = "Sample") +
   theme(legend.title = element_markdown(),
         axis.text.y = element_blank(),
-        legend.position = c(0.15, 0.8))
+        legend.position = c(0.15, 0.8)))
 
 ggsave(filename = here("plots", "analytica", "fig_7b.tiff"), 
        dpi = 300)
@@ -1238,15 +984,6 @@ AB_pH_abs <- here('data', 'pH', '2023-08-24', 'abs') %>%
   mutate(conc_rel = round(V_sample / V_total, 2))
 
 
-(ggplot(data = AB_pH_abs %>% filter(is.na(pH)),
-        aes(x = wavelength, y = absorbance)) +
-    geom_line(aes(color = factor(conc_rel))) +
-    lims(x = c(300, 500), y = c(0, 1.5)) +
-    labs(x = "Wavelength, nm", 
-         y = "Absorbance", 
-         color = "Rel. conc.") +
-    facet_wrap( ~ sample) +
-    theme(legend.title = element_markdown()))
 
 AB_pH_abs_365 <- AB_pH_abs %>%
   filter(abs(wavelength - 365) <= 3) %>%
@@ -1256,17 +993,6 @@ AB_pH_abs_365 <- AB_pH_abs %>%
 
 AB_pH_fluoro_reduced <- AB_pH_fluoro %>%
   left_join(AB_pH_abs_365, by = "file")
-
-
-ggplot(data = AB_pH_fluoro_reduced %>% filter(is.na(pH)) %>% filter(!is.na(absorbance)),
-        aes(x = wavelength, y = intensity / absorbance)) +
-    geom_line(aes(color = factor(conc_rel))) +
-    lims(x = c(400, 800)) +
-    labs(x = "Wavelength, nm", 
-         y = "Intensity, a.u.", 
-         color = "Rel. conc.") +
-    facet_wrap( ~ sample) +
-    theme(legend.title = element_markdown())
 
 
   
@@ -1288,7 +1014,6 @@ ggsave(filename = here("plots", "analytica", "fig_8.tiff"),
 
 
 # effect of Hg
-
 samples_AB_Hg <- read_csv(here('data', 'Hg', 'samples.csv'))
 
 AB_Hg_fluoro <- here('data', 'Hg', '2023-08-26', 'fluoro') %>%
@@ -1303,7 +1028,7 @@ AB_Hg_fluoro <- here('data', 'Hg', '2023-08-26', 'fluoro') %>%
   filter(wavelength <= 900) %>%
   mutate(c_Hg = c_Hg_stock * V_Hg / 3300)
 
-ggplot(data = AB_Hg_fluoro %>%
+(ggplot(data = AB_Hg_fluoro %>%
          filter(wavelength > 400) %>%
           mutate(c_Hg = signif(c_Hg * 1e6, 2)) %>%
           group_by(wavelength, c_Hg, sample, pH) %>%
@@ -1321,7 +1046,7 @@ ggplot(data = AB_Hg_fluoro %>%
   scale_color_gradient(low = "red", high = "blue", breaks = c(0, 200, 400)) +
     facet_grid(pH ~ sample) +
     theme(legend.title = element_text(),
-          legend.position = "right")
+          legend.position = "right"))
 
 ggsave(filename = here("plots", "analytica", "fig_10.tiff"), 
        dpi = 300)
@@ -1348,7 +1073,7 @@ AB_Hg_fluoro_integral <- AB_Hg_fluoro_integral %>%
          rel_sd = sd / ref)
 
 
-ggplot(data = AB_Hg_fluoro_integral %>% filter(c_Hg != 0),
+(ggplot(data = AB_Hg_fluoro_integral %>% filter(c_Hg != 0),
        aes(x = c_Hg, y = rel_integral, color = factor(pH, 
                                                       levels = c("low", "high"), 
                                                       labels = c("3.8", "6.0")))) +
@@ -1359,14 +1084,14 @@ ggplot(data = AB_Hg_fluoro_integral %>% filter(c_Hg != 0),
   theme(legend.position = "top") +
   geom_hline(yintercept = 0.97, linetype = 2) +
   labs(x = "c(Hg), mol/L", y = "Rel. intensity", color = "pH") +
-  scale_color_discrete(labels = c("3.8", "6.0"))
+  scale_color_discrete(labels = c("3.8", "6.0")))
 
 ggsave(filename = here("plots", "analytica", "fig_9a.tiff"), 
        dpi = 300)
 
 
 
-ggplot(data = AB_Hg_fluoro_integral %>% filter(c_Hg < 1e-4),
+(ggplot(data = AB_Hg_fluoro_integral %>% filter(c_Hg < 1e-4),
        aes(x = c_Hg, y = 1 / rel_integral - 1, color = factor(pH, 
                                                               levels = c("low", "high"), 
                                                               labels = c("3.8", "6.0")))) +
@@ -1379,7 +1104,7 @@ ggplot(data = AB_Hg_fluoro_integral %>% filter(c_Hg < 1e-4),
        color = "pH") +
   scale_color_discrete(labels = c("3.8", "6.0")) +
   theme(legend.position = "top",
-        axis.title.y = element_text())
+        axis.title.y = element_text()))
 
 ggsave(filename = here("plots", "analytica", "fig_9b.tiff"), 
        dpi = 300)
@@ -1390,7 +1115,6 @@ ggsave(filename = here("plots", "analytica", "fig_9b.tiff"),
 
 
 # selectivity
-
 samples_AB_selectivity <- read_csv(here('data', 'selectivity', 'samples.csv'))
 
 
@@ -1426,14 +1150,14 @@ AB_Hg_selectivity_integral <- AB_Hg_selectivity_integral %>%
          rel_sd = sd / ref)
 
 
-ggplot(data = AB_Hg_selectivity_integral %>% filter(ion != "ref"),
+(ggplot(data = AB_Hg_selectivity_integral %>% filter(ion != "ref"),
        aes(x = ion, y = rel_integral)) +
   geom_col() +
   facet_grid(sample ~ .) +
   geom_hline(yintercept = 0.97, linetype = 2, color = "red") +
   geom_hline(yintercept = 1.03, linetype = 2, color = "red") +
   theme(axis.text.x = element_markdown(angle = 45, vjust = 0.7, hjust = 0.5)) +
-  labs(x = "Probed ion", y = "Rel. intensity")
+  labs(x = "Probed ion", y = "Rel. intensity"))
 
 
 
@@ -1441,9 +1165,6 @@ ggsave(filename = here("plots", "analytica", "fig_11.tiff"),
        dpi = 300)
 
 
-
-
-toc()
 
 
 
